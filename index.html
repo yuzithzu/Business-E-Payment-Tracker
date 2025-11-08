@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Business E-Payment Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: #f4f6fb;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header {
+  background: #0078ff;
+  color: white;
+  padding: 15px;
+  font-size: 1.3em;
+  font-weight: 600;
+  text-align: center;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.form-section, .summary-section {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.form-container {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: 10px;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button {
+  margin-top: 15px;
+  background: #0078ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #005fcc;
+}
+
+.table-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 350px;
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  min-width: 600px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background: #0078ff;
+  color: white;
+}
+
+tfoot td {
+  font-weight: bold;
+  background: #f1f1f1;
+}
+
+@media (max-width: 768px) {
+  th, td {
+    font-size: 0.8em;
+    padding: 6px;
+  }
+}
+</style>
+</head>
+
+<body>
+<header>💼 BUSINESS E-PAYMENT TRACKER</header>
+
+<main>
+  <!-- FORM SECTION -->
+  <div class="form-section">
+    <div class="form-container">
+      <label for="date">📅 Date:</label>
+      <input type="date" id="date" />
+
+      <label for="transaction">💳 Transaction Type:</label>
+      <select id="transaction" onchange="updateSubCategory()">
+        <option value="">Select Transaction</option>
+        <option value="GCASH">GCASH</option>
+        <option value="LOAD">LOAD</option>
+        <option value="BILLS">BILLS PAYMENT</option>
+      </select>
+
+      <div id="subCategoryContainer" style="display:none;">
+        <label for="subCategory">🔽 Category:</label>
+        <select id="subCategory"></select>
+      </div>
+
+      <label for="amount">💰 Amount:</label>
+      <input type="number" id="amount" placeholder="Enter Amount" />
+
+      <label for="fee">💸 Fee:</label>
+      <input type="number" id="fee" placeholder="Enter Fee" />
+
+      <button onclick="addRecord()">Add Record</button>
+      <button onclick="generateSummary()">Generate Summary</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY SECTION -->
+  <div class="summary-section" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+      <h3>📊 Summary</h3>
+      <div>
+        <label for="monthFilter">📅 Filter by Month:</label>
+        <input type="month" id="monthFilter" onchange="generateSummary()" />
+      </div>
+      <div>
+        <button onclick="goBack()">⬅ Back</button>
+        <button onclick="exportToJPEG()">📷 Export to JPEG</button>
+      </div>
+    </div>
+    <div class="table-container" id="summaryTableContainer">
+      <table id="summaryTable">
+        <thead>
+          <tr>
+            <th>DATE</th>
+            <th>TRANSACTION</th>
+            <th>CATEGORY</th>
+            <th>AMOUNT</th>
+            <th>FEE</th>
+            <th>TOTAL</th>
+            <th>INCOME</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="6" style="text-align:right;">TOTAL INCOME:</td>
+            <td id="totalIncomeCell">0.00</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+let records = JSON.parse(localStorage.getItem("businessRecords")) || [];
+
+function saveRecords() {
+  localStorage.setItem("businessRecords", JSON.stringify(records));
+}
+
+// Update subcategories based on transaction type
+function updateSubCategory() {
+  const transaction = document.getElementById("transaction").value;
+  const subCat = document.getElementById("subCategory");
+  const subContainer = document.getElementById("subCategoryContainer");
+
+  subCat.innerHTML = "";
+  subContainer.style.display = "none";
+
+  let options = [];
+
+  if (transaction === "LOAD") {
+    options = ["SMART", "GLOBE", "TNT", "TM"];
+  } else if (transaction === "BILLS") {
+    options = ["POWER", "WATER", "INTERNET"];
+  }
+
+  if (options.length > 0) {
+    subContainer.style.display = "block";
+    options.forEach(opt => {
+      const o = document.createElement("option");
+      o.value = opt;
+      o.textContent = opt;
+      subCat.appendChild(o);
+    });
+  }
+}
+
+// Add Record
+function addRecord() {
+  const date = document.getElementById("date").value;
+  const transaction = document.getElementById("transaction").value;
+  const subCategory = document.getElementById("subCategory").value || "";
+  const amount = parseFloat(document.getElementById("amount").value);
+  const fee = parseFloat(document.getElementById("fee").value);
+
+  if (!date || !transaction || isNaN(amount) || isNaN(fee)) {
+    alert("Please complete all fields correctly!");
+    return;
+  }
+
+  const total = amount + fee;
+  const income = fee;
+
+  const newRecord = { date, transaction, subCategory, amount, fee, total, income };
+  records.push(newRecord);
+  saveRecords();
+
+  alert("Record added successfully!");
+  document.getElementById("date").value = "";
+  document.getElementById("transaction").value = "";
+  document.getElementById("subCategoryContainer").style.display = "none";
+  document.getElementById("amount").value = "";
+  document.getElementById("fee").value = "";
+}
+
+// Generate Summary (with month filter)
+function generateSummary() {
+  document.querySelector(".form-section").style.display = "none";
+  document.querySelector(".summary-section").style.display = "block";
+
+  const monthFilter = document.getElementById("monthFilter").value;
+  const tbody = document.querySelector("#summaryTable tbody");
+  tbody.innerHTML = "";
+
+  let filtered = records;
+  if (monthFilter) {
+    filtered = records.filter(r => r.date.startsWith(monthFilter));
+  }
+
+  let totalIncome = 0;
+
+  filtered.forEach(r => {
+    const row = `<tr>
+      <td>${r.date}</td>
+      <td>${r.transaction}</td>
+      <td>${r.subCategory || "-"}</td>
+      <td>${r.amount.toFixed(2)}</td>
+      <td>${r.fee.toFixed(2)}</td>
+      <td>${r.total.toFixed(2)}</td>
+      <td>${r.income.toFixed(2)}</td>
+    </tr>`;
+    tbody.innerHTML += row;
+    totalIncome += r.income;
+  });
+
+  document.getElementById("totalIncomeCell").textContent = totalIncome.toFixed(2);
+}
+
+function goBack() {
+  document.querySelector(".form-section").style.display = "block";
+  document.querySelector(".summary-section").style.display = "none";
+}
+
+function exportToJPEG() {
+  const summarySection = document.getElementById("summaryTableContainer");
+  html2canvas(summarySection).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "summary.jpg";
+    link.href = canvas.toDataURL("image/jpeg");
+    link.click();
+  });
+}
+</script>
+</body>
+</html>

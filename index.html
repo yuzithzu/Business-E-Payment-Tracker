@@ -103,28 +103,6 @@ tfoot td {
   background: #f1f1f1;
 }
 
-.action-btn {
-  background: #ff4444;
-  border: none;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85em;
-}
-
-.action-btn:hover { background: #cc0000; }
-
-.total-label {
-  text-align: right;
-  font-weight: 600;
-}
-
-.total-value {
-  font-weight: bold;
-  color: #0078ff;
-}
-
 .delete-btn {
   background: #ff4d4d;
   color: white;
@@ -139,60 +117,24 @@ tfoot td {
   background: #e60000;
 }
 
-/* Form section specific styles */
-.form-section {
+/* Section Styles */
+.form-section, .summary-section {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
 }
 
-/* Summary section specific styles */
-.summary-section {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 20px;
-}
-
-/* Cash In/Cash Out selector */
-.cash-type-selector {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
-}
-
-.cash-type-btn {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #0078ff;
-  background: white;
-  color: #0078ff;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.cash-type-btn.selected {
-  background: #0078ff;
-  color: white;
-}
-
-.cash-type-btn:hover:not(.selected) {
-  background: #e6f0ff;
-}
-
-/* Page visibility control */
+/* Page visibility */
 .page {
   display: none;
-  position: relative;
-  width: 100%;
 }
 
 .page.active {
   display: block;
 }
 
-/* Focus styles for accessibility */
+/* Focus */
 input:focus, select:focus {
   outline: 2px solid #0078ff;
   outline-offset: 2px;
@@ -221,15 +163,6 @@ input:focus, select:focus {
       <div id="subCategoryContainer" style="display:none;">
         <label>📱 Category:</label>
         <select id="subCategory"></select>
-      </div>
-
-      <div id="cashTypeContainer" style="display:none;">
-        <label>💰 Cash Type:</label>
-        <div class="cash-type-selector">
-          <button class="cash-type-btn" onclick="setCashType('Cash In')">Cash In</button>
-          <button class="cash-type-btn" onclick="setCashType('Cash Out')">Cash Out</button>
-        </div>
-        <input type="hidden" id="cashType" value="">
       </div>
 
       <label>💰 Amount:</label>
@@ -266,7 +199,6 @@ input:focus, select:focus {
               <th>DATE</th>
               <th>TRANSACTION</th>
               <th>CATEGORY</th>
-              <th>CASH TYPE</th>
               <th>AMOUNT (₱)</th>
               <th>FEE (₱)</th>
               <th>TOTAL (₱)</th>
@@ -277,7 +209,7 @@ input:focus, select:focus {
           <tbody></tbody>
           <tfoot>
             <tr>
-              <td colspan="7" class="total-label">TOTAL INCOME:</td>
+              <td colspan="6" class="total-label">TOTAL INCOME:</td>
               <td class="total-value" id="totalIncomeCell">₱0.00</td>
               <td></td>
             </tr>
@@ -290,7 +222,6 @@ input:focus, select:focus {
 
 <script>
 let records = JSON.parse(localStorage.getItem("businessRecords")) || [];
-let currentCashType = "";
 
 function saveRecords() {
   localStorage.setItem("businessRecords", JSON.stringify(records));
@@ -306,33 +237,17 @@ function updateSubCategory() {
   let options = [];
   if (transaction === "LOAD") options = ["SMART", "GLOBE", "TNT", "TM"];
   if (transaction === "BILLS") options = ["POWER", "WATER", "INTERNET"];
+  if (transaction === "GCASH") options = ["Cash In", "Cash Out"];
 
   if (options.length > 0) {
     container.style.display = "block";
     options.forEach(opt => {
       const o = document.createElement("option");
-      o.value = opt; o.textContent = opt;
+      o.value = opt; 
+      o.textContent = opt;
       subCat.appendChild(o);
     });
   }
-
-  // Show/hide cash type selector for GCASH
-  const cashTypeContainer = document.getElementById("cashTypeContainer");
-  if (transaction === "GCASH") {
-    cashTypeContainer.style.display = "block";
-    currentCashType = "";
-    document.querySelectorAll('.cash-type-btn').forEach(btn => btn.classList.remove('selected'));
-  } else {
-    cashTypeContainer.style.display = "none";
-    currentCashType = "";
-  }
-}
-
-function setCashType(type) {
-  currentCashType = type;
-  document.getElementById("cashType").value = type;
-  document.querySelectorAll('.cash-type-btn').forEach(btn => btn.classList.remove('selected'));
-  event.target.classList.add('selected');
 }
 
 function addRecord() {
@@ -341,22 +256,15 @@ function addRecord() {
   const subCategory = document.getElementById("subCategory").value || "";
   const amount = parseFloat(document.getElementById("amount").value);
   const fee = parseFloat(document.getElementById("fee").value);
-  const cashType = document.getElementById("cashType").value;
 
   if (!date || !transaction || isNaN(amount) || isNaN(fee)) {
     alert("Please complete all fields!");
     return;
   }
 
-  // Validate cash type for GCASH
-  if (transaction === "GCASH" && !cashType) {
-    alert("Please select Cash In or Cash Out for GCASH transactions!");
-    return;
-  }
-
   const total = amount + fee;
   const income = fee;
-  records.push({ date, transaction, subCategory, amount, fee, total, income, cashType });
+  records.push({ date, transaction, subCategory, amount, fee, total, income });
   saveRecords();
   renderTable();
 
@@ -366,10 +274,6 @@ function addRecord() {
   document.getElementById("amount").value = "";
   document.getElementById("fee").value = "";
   document.getElementById("subCategoryContainer").style.display = "none";
-  document.getElementById("cashTypeContainer").style.display = "none";
-  document.getElementById("cashType").value = "";
-  currentCashType = "";
-  document.querySelectorAll('.cash-type-btn').forEach(btn => btn.classList.remove('selected'));
 }
 
 function deleteRecord(index) {
@@ -390,14 +294,10 @@ function renderTable() {
   let totalIncome = 0;
   filtered.forEach((r, index) => {
     const tr = document.createElement("tr");
-    // For GCASH transactions, show cash type in CATEGORY column; for others, show subcategory
-    const categoryDisplay = r.transaction === "GCASH" ? r.cashType : (r.subCategory || "-");
-    const cashTypeDisplay = r.transaction === "GCASH" ? r.cashType : "Cash Out";
     tr.innerHTML = `
       <td>${r.date}</td>
       <td>${r.transaction}</td>
-      <td>${categoryDisplay}</td>
-      <td>${cashTypeDisplay}</td>
+      <td>${r.subCategory || "-"}</td>
       <td>₱${r.amount.toFixed(2)}</td>
       <td>₱${r.fee.toFixed(2)}</td>
       <td>₱${r.total.toFixed(2)}</td>
@@ -412,16 +312,12 @@ function renderTable() {
 
 function showForm() {
   document.getElementById("formPage").classList.add("active");
-  document.getElementById("formPage").classList.remove("hidden");
   document.getElementById("summaryPage").classList.remove("active");
-  document.getElementById("summaryPage").classList.add("hidden");
 }
 
 function showSummary() {
   document.getElementById("summaryPage").classList.add("active");
-  document.getElementById("summaryPage").classList.remove("hidden");
   document.getElementById("formPage").classList.remove("active");
-  document.getElementById("formPage").classList.add("hidden");
   renderTable();
 }
 
@@ -439,32 +335,20 @@ function exportToText() {
     content += `Period: ${new Date(monthFilter).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}\n\n`;
   }
   
-  content += "TRANSACTIONS:\n";
-  content += "-------------\n\n";
+  content += "TRANSACTIONS:\n-------------\n\n";
   
   let totalIncome = 0;
-  
   filtered.forEach(r => {
     totalIncome += r.income;
-    
     content += `• Date: ${r.date}\n`;
     content += `  Type: ${r.transaction}\n`;
-    content += `  Category: ${r.subCategory || "-"}`;
-    
-    // Show cash type for GCASH
-    if (r.transaction === "GCASH") {
-      content += `\n  ${r.cashType}: ₱${r.amount.toFixed(2)}\n`;
-    } else {
-      content += `\n  Cash Out: ₱${r.amount.toFixed(2)}\n`;
-    }
-    
+    content += `  Category: ${r.subCategory || "-"}\n`;
     content += `  Fee: ₱${r.fee.toFixed(2)}\n`;
     content += `  Total: ₱${r.total.toFixed(2)}\n`;
     content += `  Income: ₱${r.income.toFixed(2)}\n\n`;
   });
   
-  content += "TOTAL INCOME:\n";
-  content += "-------------\n";
+  content += "TOTAL INCOME:\n-------------\n";
   content += `₱${totalIncome.toFixed(2)}\n`;
   
   const blob = new Blob([content], { type: 'text/plain' });
@@ -478,7 +362,6 @@ function exportToText() {
   URL.revokeObjectURL(url);
 }
 
-// Initialize with form page visible
 window.onload = () => {
   document.getElementById("date").valueAsDate = new Date();
 };

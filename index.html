@@ -1,55 +1,44 @@
 <!DOCTYPE html>
 <html lang="tl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Business E-Payment Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  background: #f4f6fb;
+  background: #f5f7fb;
   color: #333;
   display: flex;
-  flex-direction: column;
-  height: 100vh;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.container {
+  width: 95%;
+  max-width: 1000px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 25px;
+  margin: 20px auto;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
 }
 
 header {
-  background: #0078ff;
-  color: white;
-  padding: 15px;
-  font-size: 1.3em;
-  font-weight: 600;
   text-align: center;
-}
-
-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.form-section, .summary-section {
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
-}
-
-.form-container {
-  background: white;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-weight: 700;
+  font-size: 1.5em;
+  color: #0078ff;
+  margin-bottom: 20px;
 }
 
 label {
-  font-weight: 600;
   display: block;
+  font-weight: 600;
   margin-top: 10px;
 }
 
@@ -59,6 +48,8 @@ input, select {
   margin-top: 5px;
   border-radius: 5px;
   border: 1px solid #ccc;
+  font-size: 1em;
+  box-sizing: border-box;
 }
 
 button {
@@ -73,18 +64,20 @@ button {
   transition: background 0.2s;
 }
 
-button:hover {
-  background: #005fcc;
+button:hover { background: #005fcc; }
+
+.flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .table-container {
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 350px;
-  background: white;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  max-height: 420px;
+  margin-top: 20px;
 }
 
 table {
@@ -92,12 +85,12 @@ table {
   border-collapse: collapse;
   font-size: 0.9em;
   min-width: 600px;
+  text-align: center;
 }
 
 th, td {
   border: 1px solid #ddd;
   padding: 8px;
-  text-align: center;
 }
 
 th {
@@ -110,26 +103,114 @@ tfoot td {
   background: #f1f1f1;
 }
 
-@media (max-width: 768px) {
-  th, td {
-    font-size: 0.8em;
-    padding: 6px;
-  }
+.action-btn {
+  background: #ff4444;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.action-btn:hover { background: #cc0000; }
+
+.total-label {
+  text-align: right;
+  font-weight: 600;
+}
+
+.total-value {
+  font-weight: bold;
+  color: #0078ff;
+}
+
+.delete-btn {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.8em;
+}
+
+.delete-btn:hover {
+  background: #e60000;
+}
+
+/* Form section specific styles */
+.form-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Summary section specific styles */
+.summary-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+/* Cash In/Cash Out selector */
+.cash-type-selector {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.cash-type-btn {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #0078ff;
+  background: white;
+  color: #0078ff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cash-type-btn.selected {
+  background: #0078ff;
+  color: white;
+}
+
+.cash-type-btn:hover:not(.selected) {
+  background: #e6f0ff;
+}
+
+/* Page visibility control */
+.page {
+  display: none;
+  position: relative;
+  width: 100%;
+}
+
+.page.active {
+  display: block;
+}
+
+/* Focus styles for accessibility */
+input:focus, select:focus {
+  outline: 2px solid #0078ff;
+  outline-offset: 2px;
 }
 </style>
 </head>
 
 <body>
-<header>💼 BUSINESS E-PAYMENT TRACKER</header>
+<div class="container">
+  <!-- FORM PAGE -->
+  <div id="formPage" class="page active">
+    <header>💼 BUSINESS E-PAYMENT TRACKER</header>
 
-<main>
-  <!-- FORM SECTION -->
-  <div class="form-section">
-    <div class="form-container">
-      <label for="date">📅 Date:</label>
-      <input type="date" id="date" />
+    <div class="form-section">
+      <label>📅 Date:</label>
+      <input type="date" id="date">
 
-      <label for="transaction">💳 Transaction Type:</label>
+      <label>💳 Transaction Type:</label>
       <select id="transaction" onchange="updateSubCategory()">
         <option value="">Select Transaction</option>
         <option value="GCASH">GCASH</option>
@@ -138,169 +219,269 @@ tfoot td {
       </select>
 
       <div id="subCategoryContainer" style="display:none;">
-        <label for="subCategory">🔽 Category:</label>
+        <label>📱 Category:</label>
         <select id="subCategory"></select>
       </div>
 
-      <label for="amount">💰 Amount:</label>
-      <input type="number" id="amount" placeholder="Enter Amount" />
+      <div id="cashTypeContainer" style="display:none;">
+        <label>💰 Cash Type:</label>
+        <div class="cash-type-selector">
+          <button class="cash-type-btn" onclick="setCashType('Cash In')">Cash In</button>
+          <button class="cash-type-btn" onclick="setCashType('Cash Out')">Cash Out</button>
+        </div>
+        <input type="hidden" id="cashType" value="">
+      </div>
 
-      <label for="fee">💸 Fee:</label>
-      <input type="number" id="fee" placeholder="Enter Fee" />
+      <label>💰 Amount:</label>
+      <input type="number" id="amount" placeholder="Enter Amount">
 
-      <button onclick="addRecord()">Add Record</button>
-      <button onclick="generateSummary()">Generate Summary</button>
+      <label>💸 Fee:</label>
+      <input type="number" id="fee" placeholder="Enter Fee">
+
+      <button onclick="addRecord()">➕ Add Transaction</button>
+      <button onclick="showSummary()">📊 Generate Summary</button>
     </div>
   </div>
 
-  <!-- SUMMARY SECTION -->
-  <div class="summary-section" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
-      <h3>📊 Summary</h3>
-      <div>
-        <label for="monthFilter">📅 Filter by Month:</label>
-        <input type="month" id="monthFilter" onchange="generateSummary()" />
+  <!-- SUMMARY PAGE -->
+  <div id="summaryPage" class="page">
+    <div class="summary-section">
+      <header>📊 BUSINESS E-PAYMENT SUMMARY</header>
+
+      <div class="flex">
+        <div>
+          <label>📅 Filter by Month:</label>
+          <input type="month" id="monthFilter" onchange="renderTable()">
+        </div>
+        <div>
+          <button onclick="showForm()">⬅ Back</button>
+          <button onclick="exportToText()">📝 Export to Text</button>
+        </div>
       </div>
-      <div>
-        <button onclick="goBack()">⬅ Back</button>
-        <button onclick="exportToJPEG()">📷 Export to JPEG</button>
+
+      <div class="table-container">
+        <table id="summaryTable">
+          <thead>
+            <tr>
+              <th>DATE</th>
+              <th>TRANSACTION</th>
+              <th>CATEGORY</th>
+              <th>CASH TYPE</th>
+              <th>AMOUNT (₱)</th>
+              <th>FEE (₱)</th>
+              <th>TOTAL (₱)</th>
+              <th>INCOME (₱)</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="7" class="total-label">TOTAL INCOME:</td>
+              <td class="total-value" id="totalIncomeCell">₱0.00</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
-    </div>
-    <div class="table-container" id="summaryTableContainer">
-      <table id="summaryTable">
-        <thead>
-          <tr>
-            <th>DATE</th>
-            <th>TRANSACTION</th>
-            <th>CATEGORY</th>
-            <th>AMOUNT</th>
-            <th>FEE</th>
-            <th>TOTAL</th>
-            <th>INCOME</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-        <tfoot>
-          <tr>
-            <td colspan="6" style="text-align:right;">TOTAL INCOME:</td>
-            <td id="totalIncomeCell">0.00</td>
-          </tr>
-        </tfoot>
-      </table>
     </div>
   </div>
-</main>
+</div>
 
 <script>
 let records = JSON.parse(localStorage.getItem("businessRecords")) || [];
+let currentCashType = "";
 
 function saveRecords() {
   localStorage.setItem("businessRecords", JSON.stringify(records));
 }
 
-// Update subcategories based on transaction type
 function updateSubCategory() {
   const transaction = document.getElementById("transaction").value;
   const subCat = document.getElementById("subCategory");
-  const subContainer = document.getElementById("subCategoryContainer");
-
+  const container = document.getElementById("subCategoryContainer");
   subCat.innerHTML = "";
-  subContainer.style.display = "none";
+  container.style.display = "none";
 
   let options = [];
-
-  if (transaction === "LOAD") {
-    options = ["SMART", "GLOBE", "TNT", "TM"];
-  } else if (transaction === "BILLS") {
-    options = ["POWER", "WATER", "INTERNET"];
-  }
+  if (transaction === "LOAD") options = ["SMART", "GLOBE", "TNT", "TM"];
+  if (transaction === "BILLS") options = ["POWER", "WATER", "INTERNET"];
 
   if (options.length > 0) {
-    subContainer.style.display = "block";
+    container.style.display = "block";
     options.forEach(opt => {
       const o = document.createElement("option");
-      o.value = opt;
-      o.textContent = opt;
+      o.value = opt; o.textContent = opt;
       subCat.appendChild(o);
     });
   }
+
+  // Show/hide cash type selector for GCASH
+  const cashTypeContainer = document.getElementById("cashTypeContainer");
+  if (transaction === "GCASH") {
+    cashTypeContainer.style.display = "block";
+    currentCashType = "";
+    document.querySelectorAll('.cash-type-btn').forEach(btn => btn.classList.remove('selected'));
+  } else {
+    cashTypeContainer.style.display = "none";
+    currentCashType = "";
+  }
 }
 
-// Add Record
+function setCashType(type) {
+  currentCashType = type;
+  document.getElementById("cashType").value = type;
+  document.querySelectorAll('.cash-type-btn').forEach(btn => btn.classList.remove('selected'));
+  event.target.classList.add('selected');
+}
+
 function addRecord() {
   const date = document.getElementById("date").value;
   const transaction = document.getElementById("transaction").value;
   const subCategory = document.getElementById("subCategory").value || "";
   const amount = parseFloat(document.getElementById("amount").value);
   const fee = parseFloat(document.getElementById("fee").value);
+  const cashType = document.getElementById("cashType").value;
 
   if (!date || !transaction || isNaN(amount) || isNaN(fee)) {
-    alert("Please complete all fields correctly!");
+    alert("Please complete all fields!");
+    return;
+  }
+
+  // Validate cash type for GCASH
+  if (transaction === "GCASH" && !cashType) {
+    alert("Please select Cash In or Cash Out for GCASH transactions!");
     return;
   }
 
   const total = amount + fee;
   const income = fee;
-
-  const newRecord = { date, transaction, subCategory, amount, fee, total, income };
-  records.push(newRecord);
+  records.push({ date, transaction, subCategory, amount, fee, total, income, cashType });
   saveRecords();
+  renderTable();
 
-  alert("Record added successfully!");
+  // Clear inputs
   document.getElementById("date").value = "";
   document.getElementById("transaction").value = "";
-  document.getElementById("subCategoryContainer").style.display = "none";
   document.getElementById("amount").value = "";
   document.getElementById("fee").value = "";
+  document.getElementById("subCategoryContainer").style.display = "none";
+  document.getElementById("cashTypeContainer").style.display = "none";
+  document.getElementById("cashType").value = "";
+  currentCashType = "";
+  document.querySelectorAll('.cash-type-btn').forEach(btn => btn.classList.remove('selected'));
 }
 
-// Generate Summary (with month filter)
-function generateSummary() {
-  document.querySelector(".form-section").style.display = "none";
-  document.querySelector(".summary-section").style.display = "block";
+function deleteRecord(index) {
+  if (confirm("Are you sure you want to delete this record?")) {
+    records.splice(index, 1);
+    saveRecords();
+    renderTable();
+  }
+}
 
-  const monthFilter = document.getElementById("monthFilter").value;
+function renderTable() {
   const tbody = document.querySelector("#summaryTable tbody");
   tbody.innerHTML = "";
+  const month = document.getElementById("monthFilter").value;
+  let filtered = records;
+  if (month) filtered = records.filter(r => r.date.startsWith(month));
 
+  let totalIncome = 0;
+  filtered.forEach((r, index) => {
+    const tr = document.createElement("tr");
+    // For GCASH transactions, show cash type in CATEGORY column; for others, show subcategory
+    const categoryDisplay = r.transaction === "GCASH" ? r.cashType : (r.subCategory || "-");
+    const cashTypeDisplay = r.transaction === "GCASH" ? r.cashType : "Cash Out";
+    tr.innerHTML = `
+      <td>${r.date}</td>
+      <td>${r.transaction}</td>
+      <td>${categoryDisplay}</td>
+      <td>${cashTypeDisplay}</td>
+      <td>₱${r.amount.toFixed(2)}</td>
+      <td>₱${r.fee.toFixed(2)}</td>
+      <td>₱${r.total.toFixed(2)}</td>
+      <td>₱${r.income.toFixed(2)}</td>
+      <td><button class="delete-btn" onclick="deleteRecord(${index})">Delete</button></td>`;
+    tbody.appendChild(tr);
+    totalIncome += r.income;
+  });
+
+  document.getElementById("totalIncomeCell").textContent = "₱" + totalIncome.toFixed(2);
+}
+
+function showForm() {
+  document.getElementById("formPage").classList.add("active");
+  document.getElementById("formPage").classList.remove("hidden");
+  document.getElementById("summaryPage").classList.remove("active");
+  document.getElementById("summaryPage").classList.add("hidden");
+}
+
+function showSummary() {
+  document.getElementById("summaryPage").classList.add("active");
+  document.getElementById("summaryPage").classList.remove("hidden");
+  document.getElementById("formPage").classList.remove("active");
+  document.getElementById("formPage").classList.add("hidden");
+  renderTable();
+}
+
+function exportToText() {
+  const monthFilter = document.getElementById("monthFilter").value;
   let filtered = records;
   if (monthFilter) {
     filtered = records.filter(r => r.date.startsWith(monthFilter));
   }
 
+  let content = "BUSINESS E-PAYMENT SUMMARY\n";
+  content += "=================================\n\n";
+  
+  if (monthFilter) {
+    content += `Period: ${new Date(monthFilter).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}\n\n`;
+  }
+  
+  content += "TRANSACTIONS:\n";
+  content += "-------------\n\n";
+  
   let totalIncome = 0;
-
+  
   filtered.forEach(r => {
-    const row = `<tr>
-      <td>${r.date}</td>
-      <td>${r.transaction}</td>
-      <td>${r.subCategory || "-"}</td>
-      <td>${r.amount.toFixed(2)}</td>
-      <td>${r.fee.toFixed(2)}</td>
-      <td>${r.total.toFixed(2)}</td>
-      <td>${r.income.toFixed(2)}</td>
-    </tr>`;
-    tbody.innerHTML += row;
     totalIncome += r.income;
+    
+    content += `• Date: ${r.date}\n`;
+    content += `  Type: ${r.transaction}\n`;
+    content += `  Category: ${r.subCategory || "-"}`;
+    
+    // Show cash type for GCASH
+    if (r.transaction === "GCASH") {
+      content += `\n  ${r.cashType}: ₱${r.amount.toFixed(2)}\n`;
+    } else {
+      content += `\n  Cash Out: ₱${r.amount.toFixed(2)}\n`;
+    }
+    
+    content += `  Fee: ₱${r.fee.toFixed(2)}\n`;
+    content += `  Total: ₱${r.total.toFixed(2)}\n`;
+    content += `  Income: ₱${r.income.toFixed(2)}\n\n`;
   });
-
-  document.getElementById("totalIncomeCell").textContent = totalIncome.toFixed(2);
+  
+  content += "TOTAL INCOME:\n";
+  content += "-------------\n";
+  content += `₱${totalIncome.toFixed(2)}\n`;
+  
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `business_summary_${monthFilter || 'all'}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
-function goBack() {
-  document.querySelector(".form-section").style.display = "block";
-  document.querySelector(".summary-section").style.display = "none";
-}
-
-function exportToJPEG() {
-  const summarySection = document.getElementById("summaryTableContainer");
-  html2canvas(summarySection).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "summary.jpg";
-    link.href = canvas.toDataURL("image/jpeg");
-    link.click();
-  });
-}
+// Initialize with form page visible
+window.onload = () => {
+  document.getElementById("date").valueAsDate = new Date();
+};
 </script>
 </body>
 </html>
